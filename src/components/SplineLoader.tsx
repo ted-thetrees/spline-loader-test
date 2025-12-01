@@ -7,15 +7,24 @@ export default function SplineLoader() {
   const [url, setUrl] = useState('');
   const [activeUrl, setActiveUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [useIframe, setUseIframe] = useState(false);
 
   const handleLoad = () => {
     if (url.trim()) {
       setIsLoading(true);
+      setError('');
       setActiveUrl(url.trim());
+      // Use iframe for my.spline.design URLs
+      setUseIframe(url.includes('my.spline.design'));
     }
   };
 
   const handleSplineLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleIframeLoad = () => {
     setIsLoading(false);
   };
 
@@ -36,7 +45,7 @@ export default function SplineLoader() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Paste a .splinecode URL..."
+            placeholder="Paste a Spline URL (my.spline.design or .splinecode)..."
             className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg 
                        focus:outline-none focus:border-zinc-500 text-white placeholder-zinc-500"
           />
@@ -51,6 +60,12 @@ export default function SplineLoader() {
           </button>
         </div>
 
+        {error && (
+          <div className="mb-4 p-4 bg-red-900/50 border border-red-700 rounded-lg text-red-200">
+            {error}
+          </div>
+        )}
+
         {activeUrl && (
           <div className="relative bg-zinc-800 rounded-xl overflow-hidden" style={{ height: '600px' }}>
             {isLoading && (
@@ -58,10 +73,19 @@ export default function SplineLoader() {
                 <div className="text-zinc-400">Loading...</div>
               </div>
             )}
-            <Spline
-              scene={activeUrl}
-              onLoad={handleSplineLoad}
-            />
+            {useIframe ? (
+              <iframe
+                src={activeUrl}
+                onLoad={handleIframeLoad}
+                className="w-full h-full border-0"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+              />
+            ) : (
+              <Spline
+                scene={activeUrl}
+                onLoad={handleSplineLoad}
+              />
+            )}
           </div>
         )}
 
